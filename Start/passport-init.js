@@ -1,21 +1,30 @@
 var LocalStrategy   = require('passport-local').Strategy;
 var bCrypt = require('bcrypt-nodejs');
-//temporary data store
+var mongoose = require('mongoose');
+var Users = mongoose.model('User');
 
 module.exports = function(passport){
-    var users = {};
     // Passport needs to be able to serialize and deserialize users to support persistent login sessions
     // Passport needs to be able to serialize and deserialize users to support persistent login sessions
     passport.serializeUser(function(user, done) {
-        console.log('serializing user:',user.username);
+        console.log('serializing user:',user._id);
         //return the unique id for the user
-        done(null, user.username);
+        return done(null, user._id);
     });
 
     //Desieralize user will call with the unique id provided by serializeuser
-    passport.deserializeUser(function(username, done) {
+    passport.deserializeUser(function(id, done) {
+        Users.findById(id, function(err, user){
+            if(err){
+                return done(err, false, {message: 'db error'});
+            }
 
-        return done(null, users[username]);
+            if(!user){
+                return done('user not found', false)
+            }
+
+            return done(err, user);
+        });
 
     });
 
@@ -24,21 +33,27 @@ module.exports = function(passport){
         },
         function(req, username, password, done) { 
             var errMsg = "";
-            if(users[username] == undefined){
-                errMsg = 'User Not Found with username '+username;
-                console.log(errMsg);
-                return done(null, false, {message: errMsg});
-            }
+            Users.findOne({username: username}, function(err, user){
+                if(err){
+                    return done(err, false, {message: 'db error'});
+                }
 
-            if(isValidPassword(users[username], password)){
-                //sucessfully authenticated
-                return done(null, users[username]);
-            }
-            else{
-                errMsg = 'Invalid password '+username;
-                console.log(errMsg);
-                return done(null, false, {message: errMsg})
-            }
+                if(!user){
+                    errMsg = 'User Not Found with username '+username;
+                    console.log(errMsg);
+                    return done(null, false, {message: errMsg});
+                }
+
+                if(isValidPassword(user, password)){
+                    //sucessfully authenticated
+                    return done(null, user);
+                }
+                else{
+                    errMsg = 'Invalid password '+username;
+                    console.log(errMsg);
+                    return done(null, false, {message: errMsg})
+                }
+            });
         }
     ));
 
@@ -47,20 +62,31 @@ module.exports = function(passport){
         },
         function(req, username, password, done) {
             var errMsg = "";
-            if (users[username]){
-                errMsg = 'User already exists with username: ' + username; 
-                console.log(errMsg);
-                return done(null, false, {message: errMsg});
-            }
-    
-            //store user in memory 
-            users[username] = {
-                username: username,
-                password: createHash(password)
-            }
+            Users.findOne({username: username}, function(err, user){
+                if(err){
+                    return done(err, false, {message: 'db error'});
+                }
 
-            errMsg = users[username].username + ' Registration successful';
-            return done(null, users[username], {message: errMsg});
+                if (user){
+                    errMsg = 'User already exists with username: ' + username; 
+                    console.log(errMsg);
+                    return done(null, false, {message: errMsg});
+                }
+
+                var  new_user = new Users({
+                    username: username,
+                    password: createHash(password)
+                })
+
+                new_user.save(function(err){
+                    if (err) {
+                        return done(null, false, {message: 'db save error'});
+                    } else {
+                        errMsg = new_user.username + ' Registration successful';
+                        return done(null, new_user, {message: errMsg});
+                    }
+                });
+            });
         })
     );
     

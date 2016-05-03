@@ -6,9 +6,14 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var passport = require('passport');
-var api = require('./routes/api');
 var authenticate = require('./routes/authenticate')(passport);
 var flash = require('connect-flash');
+var mongoose = require('mongoose');
+//connect to mongodb
+mongoose.connect("mongodb://localhost:27017/chirp-dev");
+require('./models/model.js');
+var api = require('./routes/api');
+
 
 var app = express();
 
