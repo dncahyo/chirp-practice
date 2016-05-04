@@ -9,8 +9,13 @@ var passport = require('passport');
 var authenticate = require('./routes/authenticate')(passport);
 var flash = require('connect-flash');
 var mongoose = require('mongoose');
+var dotenv = require('dotenv').config({path: 'app.env'});
 //connect to mongodb
-mongoose.connect("mongodb://localhost:27017/chirp-dev");
+if (process.env.NODE_ENV == 'staging'){
+  mongoose.connect(process.env.MONGODB_CONN_STR);
+}else{
+  mongoose.connect("mongodb://localhost:27017/chirp-dev");
+}
 require('./models/model.js');
 var api = require('./routes/api');
 var index = require('./routes/index')
