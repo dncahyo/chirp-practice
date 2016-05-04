@@ -2,7 +2,7 @@ module.exports = function (shipit) {
   require('shipit-deploy')(shipit);
   require('shipit-pm2-nginx')(shipit);
 
-  shipit.initConfig({
+  var conf = {
     default: {
       name: 'chirp-practice',
       nginx: {
@@ -26,11 +26,13 @@ module.exports = function (shipit) {
     staging: {
       servers: 'deploy@dncahyo.me'
     }
-  });
+  };
+
+  shipit.initConfig(conf);
 
   
   shipit.on('updated', function () {
-    var path = shipit.releasePath;
+    var path = conf.default.deployTo + "/Start";
     return shipit.remote('echo $PATH && cd ' + path + ' && npm install && npm ls -depth 0');
   });
 };
