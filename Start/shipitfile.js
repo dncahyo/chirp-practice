@@ -30,9 +30,12 @@ module.exports = function (shipit) {
 
   shipit.initConfig(conf);
 
-  
-  shipit.on('updated', function () {
+  shipit.blTask('npm_install', function () {
     var path = conf.default.deployTo + "/current" + "/Start";
     return shipit.remote('echo $PATH && cd ' + path + ' && npm install && npm ls -depth 0');
+  });
+
+  shipit.on('updated', function () {
+    return shipit.start('npm_install');
   });
 };
