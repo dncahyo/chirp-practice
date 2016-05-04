@@ -32,7 +32,7 @@ module.exports = function (shipit) {
 
   
   shipit.on('updated', function () {
-    var path = conf.default.deployTo + "current" + "/Start";
+    var path = conf.default.deployTo + "/current" + "/Start";
     return shipit.remote('echo $PATH && cd ' + path + ' && npm install && npm ls -depth 0');
   });
 };
