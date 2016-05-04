@@ -13,7 +13,7 @@ var mongoose = require('mongoose');
 mongoose.connect("mongodb://localhost:27017/chirp-dev");
 require('./models/model.js');
 var api = require('./routes/api');
-
+var index = require('./routes/index')
 
 var app = express();
 
@@ -37,6 +37,7 @@ app.use(flash());
 
 app.use('/auth', authenticate);
 app.use('/api', api);
+app.use('/', index);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
