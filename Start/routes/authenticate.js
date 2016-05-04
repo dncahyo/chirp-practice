@@ -34,6 +34,12 @@ module.exports = function(passport){
         res.redirect('/');
     });
 
+    //is signed in
+    router.get('/is_logged_in', function(req, res){
+        var username = req.user && req.user.username;
+        res.send({username: username});
+    });
+
     return router;
 
 }

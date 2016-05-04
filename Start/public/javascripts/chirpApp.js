@@ -1,6 +1,15 @@
-var app = angular.module('chirpApp', ['ngRoute', 'ngResource']).run(function($http, $rootScope) {
+var app = angular.module('chirpApp', ['ngRoute', 'ngResource']).run(function($http, $rootScope, $location) {
   $rootScope.authenticated = false;
   $rootScope.current_user = 'Guest';
+
+  $http.get('/auth/is_logged_in').success(function(data){
+    if(data.username){
+      $rootScope.authenticated = true;
+      $rootScope.current_user = data.username;
+      $location.path('/');
+    }
+  });
+
 
   $rootScope.signout = function(){
     $http.get('auth/signout');
