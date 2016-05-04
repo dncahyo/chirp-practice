@@ -9,7 +9,7 @@ var passport = require('passport');
 var authenticate = require('./routes/authenticate')(passport);
 var flash = require('connect-flash');
 var mongoose = require('mongoose');
-var dotenv = require('dotenv').config({path: 'app.env'});
+var dotenv = require('dotenv').config({path: __dirname+'/app.env'});
 //connect to mongodb
 if (process.env.NODE_ENV == 'staging'){
   mongoose.connect(process.env.MONGODB_CONN_STR);
